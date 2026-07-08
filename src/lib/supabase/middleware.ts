@@ -62,6 +62,22 @@ export async function updateSession(request: NextRequest) {
       url.search = ''
       return NextResponse.redirect(url)
     }
+
+    // Vendors must also be approved before accessing /vendor routes.
+    if (protectedRoute.role === 'vendor') {
+      const { data: vendor } = await supabase
+        .from('vendors')
+        .select('status')
+        .eq('profile_id', user.id)
+        .maybeSingle()
+
+      if (vendor?.status !== 'approved') {
+        const url = request.nextUrl.clone()
+        url.pathname = '/'
+        url.search = ''
+        return NextResponse.redirect(url)
+      }
+    }
   }
 
   return supabaseResponse
