@@ -1,10 +1,9 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { createClient } from '@/lib/supabase/server'
 import { sendNewApplicationAdminAlert } from '@/lib/resend/emails'
 
-// No admin-email config or admin-settings table exists yet; hardcode for
-// now and move to an env var / admin settings table once one exists.
-const ADMIN_EMAIL = 'westong03@gmail.com'
+const ADMIN_EMAIL = process.env.ADMIN_NOTIFICATION_EMAIL
 
 interface VendorApplyBody {
   user_id?: string
@@ -22,6 +21,14 @@ interface VendorApplyBody {
 // Ensures a vendor profile exists after signUp and creates the
 // vendor_application record. Never changes the role of an existing profile.
 export async function POST(request: Request) {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) {
+    return NextResponse.json({ error: 'Not authenticated.' }, { status: 401 })
+  }
+
   let body: VendorApplyBody
   try {
     body = await request.json()
@@ -34,6 +41,12 @@ export async function POST(request: Request) {
     return NextResponse.json(
       { error: 'user_id and business_name are required.' },
       { status: 400 }
+    )
+  }
+  if (user.id !== user_id) {
+    return NextResponse.json(
+      { error: 'You can only register your own account.' },
+      { status: 403 }
     )
   }
 
@@ -105,13 +118,15 @@ export async function POST(request: Request) {
     )
   }
 
-  await sendNewApplicationAdminAlert({
-    to: ADMIN_EMAIL,
-    applicationId: application.id,
-    businessName: business_name.trim(),
-    applicantEmail: body.email ?? userData.user.email ?? 'unknown',
-    yearsExperience: body.years_experience ?? null,
-  })
+  if (ADMIN_EMAIL) {
+    await sendNewApplicationAdminAlert({
+      to: ADMIN_EMAIL,
+      applicationId: application.id,
+      businessName: business_name.trim(),
+      applicantEmail: body.email ?? userData.user.email ?? 'unknown',
+      yearsExperience: body.years_experience ?? null,
+    })
+  }
 
   return NextResponse.json({ ok: true })
 }

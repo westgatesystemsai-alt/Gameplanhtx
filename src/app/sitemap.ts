@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { vendorProfileSlug } from '@/lib/vendors/search'
 import type { Category, Vendor } from '@/types'
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://gameplanhtx.com'
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://gameplanhtx.com'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const supabase = await createClient()
