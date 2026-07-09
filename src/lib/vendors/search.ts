@@ -35,13 +35,21 @@ const NINETY_DAYS_MS = 90 * 24 * 60 * 60 * 1000
 export function rankingScore(vendor: {
   avg_rating: number
   profile_completeness: number
-  response_rate: number
+  response_rate: number | null
   recentActivity: boolean
 }): number {
+  // response_rate is the vendor's average first-reply time in hours
+  // (lower is better), or null when there's no reply data yet. Decay
+  // linearly to 0 by the 48h mark; treat "no data" as neutral (0)
+  // rather than punishing new vendors who haven't gotten a reply
+  // window yet.
+  const responseScore =
+    vendor.response_rate == null ? 0 : Math.max(0, 1 - vendor.response_rate / 48)
+
   return (
     (vendor.avg_rating / 5) * 0.35 +
     (vendor.profile_completeness / 100) * 0.25 +
-    (vendor.response_rate / 100) * 0.25 +
+    responseScore * 0.25 +
     (vendor.recentActivity ? 1 : 0) * 0.15
   )
 }
@@ -104,20 +112,27 @@ export async function searchVendors(
     vendors = vendors.filter((v) => !blockedIds.has(v.id))
   }
 
-  // 4. Budget — keep vendors with at least one active service in range;
-  //    price_type = 'contact' is always included
+  // 4. Budget — prefer the vendor's own transparent price range when set
+  //    (overlap against the selected budget bin); otherwise fall back to
+  //    keeping vendors with at least one active service in range, where
+  //    price_type = 'contact' is always included.
   const hasBudget = params.budget_min != null || params.budget_max != null
   if (hasBudget) {
     const min = params.budget_min ?? 0
     const max = params.budget_max ?? Number.POSITIVE_INFINITY
-    vendors = vendors.filter((v) =>
-      v.services.some(
+    vendors = vendors.filter((v) => {
+      if (v.price_range_min != null || v.price_range_max != null) {
+        const vendorMin = v.price_range_min ?? 0
+        const vendorMax = v.price_range_max ?? Number.POSITIVE_INFINITY
+        return vendorMin <= max && vendorMax >= min
+      }
+      return v.services.some(
         (s) =>
           s.is_active &&
           (s.price_type === 'contact' ||
             (s.price_amount != null && s.price_amount >= min && s.price_amount <= max))
       )
-    )
+    })
   }
 
   // 5. Guest count — planner's count within min_guests / max_guests

@@ -1,26 +1,56 @@
 @import "tailwindcss";
 
+/* Force the light brand theme app-wide. The public design system is a fixed
+   light palette (cream background, navy ink, orange action), so `dark:`
+   utilities are made opt-in via an explicit `.dark` class that is never set —
+   this neutralizes prefers-color-scheme without editing every component. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
+  color-scheme: light;
+
   --background: #ffffff;
   --foreground: #171717;
+
+  /* Game Plan HTX brand palette (also exposed as Tailwind colors below). */
+  --color-bg: #f8f7f4;
+  --color-ink: #0f1c2e;
+  --color-action: #ff4d1f;
+  --color-gold: #f0b429;
+  --color-verified: #1a7f5a;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-figtree), var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-outfit: var(--font-outfit-family);
+  --font-figtree: var(--font-figtree);
+
+  /* Brand design tokens — literals so `bg-action`, `text-ink`, `fill-gold`,
+     `bg-verified`, `bg-bg`, etc. resolve as Tailwind color utilities. */
+  --color-bg: #f8f7f4;
+  --color-ink: #0f1c2e;
+  --color-action: #ff4d1f;
+  --color-gold: #f0b429;
+  --color-verified: #1a7f5a;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* Base element defaults live in @layer base so Tailwind utilities (e.g.
+   text-white on a hero h1) always override them. */
+@layer base {
+  body {
+    background-color: var(--color-bg);
+    color: #4b5563;
+    line-height: 1.75;
+    font-family: var(--font-figtree), Figtree, Arial, Helvetica, sans-serif;
   }
-}
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-outfit-family), Outfit, sans-serif;
+    color: var(--color-ink);
+  }
 }

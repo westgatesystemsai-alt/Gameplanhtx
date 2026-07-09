@@ -23,7 +23,7 @@ export default async function AdminVendorsPage({
   let query = supabase
     .from('vendors')
     .select(
-      'id, business_name, slug, tier, avg_rating, profile:profiles!vendors_profile_id_fkey(full_name, email)'
+      'id, business_name, slug, tier, avg_rating, verified_items, profile:profiles!vendors_profile_id_fkey(full_name, email)'
     )
     .eq('status', 'approved')
     .order('business_name')

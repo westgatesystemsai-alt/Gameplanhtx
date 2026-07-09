@@ -47,14 +47,16 @@ export default async function VendorSearchPage({ searchParams }: SearchPageProps
 
   return (
     <main className="mx-auto max-w-6xl px-6 py-10">
-      <h1 className="mb-6 text-3xl font-bold tracking-tight">Find Houston Event Vendors</h1>
+      <h1 className="mb-6 font-outfit text-3xl font-bold tracking-tight text-ink">
+        Find Houston Event Vendors
+      </h1>
       <Suspense>
         <VendorSearchFilters categories={(categories ?? []) as Category[]} />
       </Suspense>
 
       {featured.length > 0 && (
         <section className="mt-8">
-          <h2 className="mb-4 text-lg font-semibold">Featured Vendors</h2>
+          <h2 className="mb-4 font-outfit text-lg font-bold text-ink">Featured Vendors</h2>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {featured.map((v) => (
               <VendorCard key={v.id} vendor={v} featured />
@@ -64,11 +66,11 @@ export default async function VendorSearchPage({ searchParams }: SearchPageProps
       )}
 
       <section className="mt-8">
-        <h2 className="mb-4 text-lg font-semibold">
+        <h2 className="mb-4 font-outfit text-lg font-bold text-ink">
           {result.total} vendor{result.total === 1 ? '' : 's'} found
         </h2>
         {vendors.length === 0 ? (
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-gray-600">
             No vendors match your search. Try adjusting your filters.
           </p>
         ) : (
@@ -91,10 +93,10 @@ export default async function VendorSearchPage({ searchParams }: SearchPageProps
               <a
                 key={p}
                 href={`/vendors?${pageParams.toString()}`}
-                className={`rounded-lg border px-3 py-1.5 text-sm ${
+                className={`rounded-lg border px-3 py-1.5 text-sm transition ${
                   p === result.page
-                    ? 'border-gray-900 bg-gray-900 text-white dark:border-white dark:bg-white dark:text-gray-900'
-                    : 'border-gray-300 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800'
+                    ? 'border-action bg-action text-white'
+                    : 'border-[#E5E2DA] bg-white hover:border-action hover:text-action'
                 }`}
               >
                 {p}

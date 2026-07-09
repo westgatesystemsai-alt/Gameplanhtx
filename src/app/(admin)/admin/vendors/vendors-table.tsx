@@ -4,6 +4,9 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { FormEvent, useState } from 'react'
 import StatusBadge from '@/components/ui/StatusBadge'
+import VerifiedBadge from '@/components/vendor/VerifiedBadge'
+import { VERIFIED_ITEMS, isVendorVerified } from '@/lib/vendors/verified'
+import type { VerifiedItems } from '@/types'
 
 export interface VendorRow {
   id: string
@@ -11,6 +14,7 @@ export interface VendorRow {
   slug: string
   tier: string
   avg_rating: number
+  verified_items: VerifiedItems
   profile: { full_name: string | null; email: string | null } | null
 }
 
@@ -30,6 +34,11 @@ export default function VendorsTable({
   const [busyId, setBusyId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [suspendedIds, setSuspendedIds] = useState<Set<string>>(new Set())
+  const [verifiedItems, setVerifiedItems] = useState<Record<string, VerifiedItems>>(() =>
+    Object.fromEntries(vendors.map((v) => [v.id, v.verified_items]))
+  )
+  const [verifyBusyId, setVerifyBusyId] = useState<string | null>(null)
+  const [verifyError, setVerifyError] = useState<string | null>(null)
 
   function onSearch(e: FormEvent) {
     e.preventDefault()
@@ -55,6 +64,28 @@ export default function VendorsTable({
     }
   }
 
+  async function toggleVerification(vendorId: string, key: keyof VerifiedItems, checked: boolean) {
+    const previous = verifiedItems[vendorId]
+    const updated = { ...previous, [key]: checked }
+    setVerifiedItems((prev) => ({ ...prev, [vendorId]: updated }))
+    setVerifyBusyId(vendorId)
+    setVerifyError(null)
+    try {
+      const res = await fetch(`/api/admin/vendors/${vendorId}/verify`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ verified_items: updated }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? 'Could not update verification.')
+    } catch (err) {
+      setVerifiedItems((prev) => ({ ...prev, [vendorId]: previous }))
+      setVerifyError(err instanceof Error ? err.message : 'Could not update verification.')
+    } finally {
+      setVerifyBusyId(null)
+    }
+  }
+
   return (
     <div className="mt-6">
       <form onSubmit={onSearch} className="flex gap-2">
@@ -74,6 +105,7 @@ export default function VendorsTable({
       </form>
 
       {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
+      {verifyError && <p className="mt-3 text-sm text-red-600">{verifyError}</p>}
 
       {!vendors.length ? (
         <div className="mt-4 rounded-xl border border-dashed border-gray-300 p-10 text-center text-sm text-gray-500 dark:border-gray-700">
@@ -89,6 +121,7 @@ export default function VendorsTable({
                 <th className="px-4 py-3 font-medium">Tier</th>
                 <th className="px-4 py-3 font-medium">Rating</th>
                 <th className="px-4 py-3 font-medium">Status</th>
+                <th className="px-4 py-3 font-medium">Gameplan Verified</th>
                 <th className="px-4 py-3 font-medium" />
               </tr>
             </thead>
@@ -112,6 +145,22 @@ export default function VendorsTable({
                   <td className="px-4 py-3">{Number(v.avg_rating).toFixed(1)}</td>
                   <td className="px-4 py-3">
                     <StatusBadge status={suspendedIds.has(v.id) ? 'suspended' : 'approved'} />
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex flex-col gap-1.5">
+                      {isVendorVerified(verifiedItems[v.id]) && <VerifiedBadge />}
+                      {VERIFIED_ITEMS.map((item) => (
+                        <label key={item.key} className="flex items-center gap-1.5 text-xs">
+                          <input
+                            type="checkbox"
+                            checked={verifiedItems[v.id]?.[item.key] ?? false}
+                            disabled={verifyBusyId === v.id}
+                            onChange={(e) => toggleVerification(v.id, item.key, e.target.checked)}
+                          />
+                          {item.label}
+                        </label>
+                      ))}
+                    </div>
                   </td>
                   <td className="px-4 py-3 text-right">
                     {!suspendedIds.has(v.id) && (

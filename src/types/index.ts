@@ -23,6 +23,13 @@ export interface Profile {
   updated_at: string
 }
 
+export interface VerifiedItems {
+  insurance: boolean
+  license: boolean
+  portfolio: boolean
+  standards: boolean
+}
+
 export interface Vendor {
   id: string
   profile_id: string
@@ -40,8 +47,11 @@ export interface Vendor {
   subscription_id: string | null
   avg_rating: number
   review_count: number
-  response_rate: number
+  response_rate: number | null
   profile_completeness: number
+  price_range_min: number | null
+  price_range_max: number | null
+  verified_items: VerifiedItems
   created_at: string
   updated_at: string
 }

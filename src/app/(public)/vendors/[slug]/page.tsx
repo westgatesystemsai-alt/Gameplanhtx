@@ -4,6 +4,10 @@ import { notFound } from 'next/navigation'
 import { Star } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { parseVendorSlug, vendorProfileSlug } from '@/lib/vendors/search'
+import { VERIFIED_ITEMS, isVendorVerified } from '@/lib/vendors/verified'
+import VerifiedBadge from '@/components/vendor/VerifiedBadge'
+import ResponseTimeBadge from '@/components/vendor/ResponseTimeBadge'
+import ProfileViewTracker from '@/components/vendor/ProfileViewTracker'
 import type { Category, PortfolioMedia, Review, Service, Vendor } from '@/types'
 
 export const dynamic = 'force-dynamic'
@@ -104,6 +108,7 @@ export default async function VendorProfilePage({ params }: ProfilePageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+      <ProfileViewTracker vendorId={vendor.id} vendorProfileId={vendor.profile_id} />
 
       {/* Hero */}
       <div className="relative aspect-[21/9] overflow-hidden rounded-2xl bg-gray-100 dark:bg-gray-800">
@@ -124,19 +129,24 @@ export default async function VendorProfilePage({ params }: ProfilePageProps) {
       {/* Header */}
       <div className="mt-6 flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">{vendor.business_name}</h1>
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="font-outfit text-3xl font-extrabold tracking-tight text-ink">
+              {vendor.business_name}
+            </h1>
+            <ResponseTimeBadge responseRate={vendor.response_rate} />
+          </div>
           <div className="mt-2 flex flex-wrap items-center gap-2">
             {categories.map((c) => (
               <Link
                 key={c.id}
                 href={`/categories/${c.slug}`}
-                className="rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700 hover:bg-blue-100 dark:bg-blue-950 dark:text-blue-300"
+                className="rounded-full border border-[#E5E2DA] bg-white px-3 py-1 font-outfit text-xs font-semibold uppercase tracking-wide text-action transition hover:border-action"
               >
                 {c.name}
               </Link>
             ))}
-            <span className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400">
-              <Star size={14} className="fill-amber-400 text-amber-400" />
+            <span className="flex items-center gap-1 text-sm text-gray-600">
+              <Star size={14} className="fill-gold text-gold" />
               {vendor.avg_rating > 0 ? vendor.avg_rating.toFixed(1) : 'New'}
               {vendor.review_count > 0 && ` (${vendor.review_count} reviews)`}
             </span>
@@ -144,11 +154,34 @@ export default async function VendorProfilePage({ params }: ProfilePageProps) {
         </div>
         <Link
           href={`/messages/new?vendor=${vendor.id}`}
-          className="rounded-lg bg-gray-900 px-6 py-3 text-sm font-semibold text-white transition hover:bg-gray-700 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-200"
+          className="rounded-lg bg-action px-6 py-3 font-outfit text-sm font-bold text-white transition hover:opacity-90"
         >
           Send Inquiry
         </Link>
       </div>
+
+      {/* Gameplan Verified */}
+      {isVendorVerified(vendor.verified_items) && (
+        <section className="mt-8 rounded-xl border-2 border-verified bg-verified/5 p-5">
+          <div className="flex items-center gap-2">
+            <VerifiedBadge />
+            <h2 className="font-outfit text-lg font-semibold">Gameplan Verified</h2>
+          </div>
+          <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
+            This vendor has completed Game Plan HTX&apos;s verification process.
+          </p>
+          <details className="mt-3 text-sm">
+            <summary className="cursor-pointer font-medium text-action">
+              What does this mean?
+            </summary>
+            <ul className="mt-2 list-disc space-y-1 pl-5 text-gray-600 dark:text-gray-400">
+              {VERIFIED_ITEMS.map((item) => (
+                <li key={item.key}>{item.label}</li>
+              ))}
+            </ul>
+          </details>
+        </section>
+      )}
 
       {/* Bio */}
       {vendor.bio && (
@@ -228,9 +261,7 @@ export default async function VendorProfilePage({ params }: ProfilePageProps) {
                         key={i}
                         size={14}
                         className={
-                          i <= r.rating
-                            ? 'fill-amber-400 text-amber-400'
-                            : 'fill-gray-200 text-gray-200 dark:fill-gray-700 dark:text-gray-700'
+                          i <= r.rating ? 'fill-gold text-gold' : 'fill-gray-200 text-gray-200'
                         }
                       />
                     ))}
