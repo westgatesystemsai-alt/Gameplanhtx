@@ -1,6 +1,46 @@
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/server";
+import type { Category } from "@/types";
 
-export default function HomePage() {
+export const dynamic = "force-dynamic";
+
+const HOW_IT_WORKS = [
+  {
+    step: "1. Describe Your Event",
+    description: "Tell us the occasion, date, guest count, and budget in a few quick steps.",
+  },
+  {
+    step: "2. Get Matched",
+    description: "We shortlist vetted Houston vendors who fit your event and are available.",
+  },
+  {
+    step: "3. Book With Confidence",
+    description: "Compare quotes, message vendors directly, and book knowing every pro is vetted.",
+  },
+];
+
+const VALUE_PROPS = [
+  {
+    title: "Every Vendor Vetted",
+    description: "Insurance, licensing, and portfolio checked before a vendor ever joins.",
+  },
+  {
+    title: "Transparent Pricing",
+    description: "See real price ranges up front — no guessing games or hidden fees.",
+  },
+  {
+    title: "Responses Guaranteed",
+    description: "Vendors are held to a response window, so your inquiries don't go dark.",
+  },
+];
+
+export default async function HomePage() {
+  const supabase = await createClient();
+  const { data: categories } = await supabase
+    .from("categories")
+    .select("*")
+    .order("sort_order");
+
   return (
     <main className="flex flex-1 flex-col">
       {/* Hero */}
@@ -59,6 +99,65 @@ export default function HomePage() {
         >
           Plan My Event
         </Link>
+      </section>
+
+      {/* Section A — How It Works */}
+      <section className="bg-white px-6 py-16">
+        <div className="mx-auto max-w-5xl">
+          <h2 className="mb-10 text-center font-outfit text-2xl font-bold text-ink sm:text-3xl">
+            How It Works
+          </h2>
+          <div className="grid gap-8 sm:grid-cols-3">
+            {HOW_IT_WORKS.map((item) => (
+              <div key={item.step} className="flex flex-col items-center gap-2 text-center">
+                <h3 className="font-outfit text-lg font-bold text-ink">{item.step}</h3>
+                <p className="text-base">{item.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Section B — Browse by Category */}
+      <section className="bg-bg px-6 py-16">
+        <div className="mx-auto max-w-5xl">
+          <h2 className="mb-10 text-center font-outfit text-2xl font-bold text-ink sm:text-3xl">
+            Browse by Category
+          </h2>
+          <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
+            {((categories ?? []) as Category[]).map((c) => (
+              <Link
+                key={c.id}
+                href={`/vendors?category=${c.slug}`}
+                className="flex items-center gap-3 rounded-xl border border-[#E5E2DA] bg-white p-5 shadow-sm transition hover:shadow-md"
+              >
+                <span className="text-2xl" aria-hidden>
+                  {c.icon ?? "🎉"}
+                </span>
+                <span className="font-outfit text-sm font-semibold text-ink">{c.name}</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Section C — Why Game Plan HTX */}
+      <section className="bg-ink px-6 py-16">
+        <div className="mx-auto max-w-5xl">
+          <h2 className="mb-10 text-center font-outfit text-2xl font-bold text-white sm:text-3xl">
+            Why Game Plan HTX
+          </h2>
+          <div className="grid gap-8 sm:grid-cols-3">
+            {VALUE_PROPS.map((item) => (
+              <div key={item.title} className="flex flex-col items-center gap-2 text-center">
+                <h3 className="font-outfit text-lg font-bold text-white">{item.title}</h3>
+                <p className="text-sm" style={{ color: "#9CA3AF" }}>
+                  {item.description}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
       </section>
     </main>
   );

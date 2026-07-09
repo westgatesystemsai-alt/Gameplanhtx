@@ -53,8 +53,26 @@ function LoginForm() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center px-6">
-      <div className="w-full max-w-md">
+    <main className="flex min-h-screen">
+      <div className="hidden w-1/2 flex-col justify-center bg-ink px-16 lg:flex">
+        <span className="flex h-14 w-14 items-center justify-center rounded-md bg-action font-outfit text-2xl font-black text-white">
+          G
+        </span>
+        <p className="mt-6 max-w-sm font-outfit text-2xl font-bold text-white">
+          Houston&apos;s Event Vendor Marketplace
+        </p>
+        <div className="mt-10 flex flex-col gap-3">
+          <span className="font-outfit text-sm font-semibold text-white">✓ Vetted Vendors</span>
+          <span className="font-outfit text-sm font-semibold text-white">⚡ Fast Responses</span>
+          <span className="font-outfit text-sm font-semibold text-white">★ Verified Reviews</span>
+        </div>
+      </div>
+
+      <div className="flex w-full flex-col items-center justify-center bg-white px-6 py-16 lg:w-1/2">
+        <span className="mb-8 flex h-12 w-12 items-center justify-center rounded-md bg-action font-outfit text-xl font-black text-white lg:hidden">
+          G
+        </span>
+        <div className="w-full max-w-md">
         <h1 className="text-3xl font-bold tracking-tight">Log in</h1>
         <p className="mt-2 text-gray-600 dark:text-gray-400">
           Welcome back to Game Plan HTX.
@@ -102,6 +120,7 @@ function LoginForm() {
             Create an account
           </Link>
         </p>
+        </div>
       </div>
     </main>
   )
