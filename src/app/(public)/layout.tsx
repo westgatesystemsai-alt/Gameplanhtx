@@ -37,6 +37,12 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
               Playbook
             </Link>
             <Link
+              href="/login"
+              className="hidden font-outfit text-sm font-semibold text-white transition hover:text-action sm:block"
+            >
+              Log in
+            </Link>
+            <Link
               href="/plan"
               className="rounded-md bg-action px-4 py-2 font-outfit text-sm font-bold text-white transition hover:opacity-90"
             >

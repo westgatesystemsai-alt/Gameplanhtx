@@ -108,7 +108,7 @@ function LoginForm() {
           <button
             type="submit"
             disabled={submitting}
-            className="mt-2 rounded-md bg-black px-4 py-2 font-medium text-white disabled:opacity-50 dark:bg-white dark:text-black"
+            className="mt-2 rounded-md bg-action px-4 py-2 font-outfit font-bold text-white transition hover:opacity-90 disabled:opacity-50"
           >
             {submitting ? 'Logging in…' : 'Log in'}
           </button>

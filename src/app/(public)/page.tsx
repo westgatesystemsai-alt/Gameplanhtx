@@ -46,11 +46,17 @@ export default async function HomePage() {
       {/* Hero */}
       <section className="bg-ink px-6 py-20 sm:py-28">
         <div className="mx-auto flex max-w-4xl flex-col items-center gap-6 text-center">
+          <span
+            className="font-outfit font-bold uppercase"
+            style={{ fontSize: 12, letterSpacing: "0.1em", color: "#FF4D1F" }}
+          >
+            Houston&apos;s Event Vendor Marketplace
+          </span>
           <h1
             className="font-outfit font-black text-white"
             style={{ fontSize: 48, lineHeight: 1.1, letterSpacing: "-1px" }}
           >
-            Houston&apos;s Event Vendor Marketplace
+            What&apos;s the Game Plan?
           </h1>
           <p
             className="max-w-2xl"
@@ -84,23 +90,6 @@ export default async function HomePage() {
         </div>
       </div>
 
-      {/* Intro */}
-      <section className="mx-auto flex max-w-2xl flex-col items-center gap-4 px-6 py-16 text-center">
-        <h2 className="font-outfit text-2xl font-bold text-ink">
-          One roof for your whole event team
-        </h2>
-        <p className="text-lg">
-          Every event vendor Houston has to offer — vetted, bookable, and under one roof.
-          Tell us about your event and we&apos;ll build your shortlist.
-        </p>
-        <Link
-          href="/plan"
-          className="mt-2 rounded-md bg-action px-7 py-3 font-outfit text-base font-bold text-white transition hover:opacity-90"
-        >
-          Plan My Event
-        </Link>
-      </section>
-
       {/* Section A — How It Works */}
       <section className="bg-white px-6 py-16">
         <div className="mx-auto max-w-5xl">
@@ -129,12 +118,14 @@ export default async function HomePage() {
               <Link
                 key={c.id}
                 href={`/vendors?category=${c.slug}`}
-                className="flex items-center gap-3 rounded-xl border border-[#E5E2DA] bg-white p-5 shadow-sm transition hover:shadow-md"
+                className="flex cursor-pointer items-center gap-3 rounded-xl border border-[#E5E2DA] border-l-[3px] border-l-transparent bg-white px-6 py-5 transition hover:border-l-action hover:shadow-lg"
               >
-                <span className="text-2xl" aria-hidden>
+                <span style={{ fontSize: 28 }} aria-hidden>
                   {c.icon ?? "🎉"}
                 </span>
-                <span className="font-outfit text-sm font-semibold text-ink">{c.name}</span>
+                <span className="font-outfit font-bold" style={{ fontSize: 15, color: "#0F1C2E" }}>
+                  {c.name}
+                </span>
               </Link>
             ))}
           </div>
